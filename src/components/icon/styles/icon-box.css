@@ -1,0 +1,20 @@
+.icon-box {
+  outline: none;
+  border: none;
+  background: transparent;
+  padding: 0.5rem;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--gray-900);
+}
+
+.icon-box:hover {
+  background-color: var(--gray-100);
+  cursor: pointer;
+  transition-duration: 100ms;
+  transition-timing-function: ease-out;
+}
