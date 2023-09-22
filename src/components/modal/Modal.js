@@ -5,6 +5,7 @@ import "./styles/modal.css";
 export default function Modal({
   onAction = () => {},
   onClose = () => {},
+  actionButtonText = "",
   children,
   show = false,
 }) {
@@ -20,7 +21,7 @@ export default function Modal({
               </Button>
 
               <Button onClick={onAction} type="primary">
-                Add
+                {actionButtonText}
               </Button>
             </div>
           </div>
