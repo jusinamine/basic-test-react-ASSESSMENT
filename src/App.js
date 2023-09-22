@@ -2,7 +2,7 @@ import { useState } from "react";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import "./App.css";
 import { IconBox, PlusIcon, SearchIcon } from "./components/icon";
-import { DotsIcon } from "./components/icon/icons";
+import { DotsIcon, EditIcon, TrashIcon } from "./components/icon/icons";
 import { Input, Search } from "./components/input";
 import { Modal } from "./components/modal";
 function App() {
@@ -11,14 +11,28 @@ function App() {
   const [todoItems, setTodoItems] = useState([]);
   const [doneItems, setDoneItems] = useState([]);
 
+  //function to add new tasks to the todo list
   const handleAddNewTask = () => {
     setTodoItems((oldValue) => [...oldValue, newTaskInputValue]);
     setNewTaskInputValue("");
     setShowAddTaskModal(false);
   };
 
+  //function to remove tasks from the list (done or todo)
+  const handleRemoveTask = (e, location, index) => {
+    e.preventDefault();
+
+    //chack if the task in todo or done list and remove it
+    if (location === "todo") {
+      setTodoItems((oldValue) => oldValue?.filter((_, i) => i !== index));
+      return;
+    }
+
+    setDoneItems((oldValue) => oldValue?.filter((_, i) => i !== index));
+  };
+
+  //function for handling drag and drop from todo list to done list and the opposit
   const handleDragAndDrop = (result) => {
-    console.log(result);
     if (!result.destination) return; // When dropped outside a droppable area
     const sourceList = result.source.droppableId;
     const destinationList = result.destination.droppableId;
@@ -73,13 +87,19 @@ function App() {
             <div className="title">To do</div>
 
             <div className="item-box">
-              <TodoList todoItems={todoItems} />
+              <TodoList
+                todoItems={todoItems}
+                handleRemoveTask={handleRemoveTask}
+              />
             </div>
           </div>
           <div>
             <div className="title">Done</div>
             <div className="item-box">
-              <DoneList doneItems={doneItems} />
+              <DoneList
+                doneItems={doneItems}
+                handleRemoveTask={handleRemoveTask}
+              />
             </div>
           </div>
         </DragDropContext>
@@ -104,7 +124,7 @@ function App() {
 }
 
 //todo list dropzone
-function TodoList({ todoItems }) {
+function TodoList({ todoItems, handleRemoveTask = () => {} }) {
   return (
     <Droppable droppableId="todo">
       {(provided) => (
@@ -130,6 +150,15 @@ function TodoList({ todoItems }) {
                   <div className="item">
                     <DotsIcon />
                     <div className="text">{item}</div>
+                    <div className="item-icon edit-icon">
+                      <EditIcon height={18} width={18} />
+                    </div>
+                    <div
+                      className="item-icon delete-icon"
+                      onClick={(e) => handleRemoveTask(e, "todo", index)}
+                    >
+                      <TrashIcon height={18} width={18} />
+                    </div>
                   </div>
                   {provided.placeholder}
                 </div>
@@ -143,7 +172,7 @@ function TodoList({ todoItems }) {
 }
 
 //done list dropzone
-function DoneList({ doneItems }) {
+function DoneList({ doneItems, handleRemoveTask = () => {} }) {
   return (
     <Droppable droppableId="done">
       {(provided) => (
@@ -156,7 +185,7 @@ function DoneList({ doneItems }) {
           {doneItems?.map((item, index) => (
             <Draggable
               key={"key" + index}
-              draggableId={"d2" + index.toString()}
+              draggableId={"done" + index.toString()}
               index={index}
             >
               {(provided) => (
@@ -168,6 +197,15 @@ function DoneList({ doneItems }) {
                   <div className="item">
                     <DotsIcon />
                     <div className="text">{item}</div>
+                    <div className="item-icon edit-icon">
+                      <EditIcon height={18} width={18} />
+                    </div>
+                    <div
+                      className="item-icon delete-icon"
+                      onClick={(e) => handleRemoveTask(e, "done", index)}
+                    >
+                      <TrashIcon height={18} width={18} />
+                    </div>
                   </div>
                   {provided.placeholder}
                 </div>

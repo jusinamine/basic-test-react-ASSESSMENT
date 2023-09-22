@@ -3,6 +3,12 @@
   --gray-100: #f3f4f6;
   --gray-600: #475569;
   --gray-900: #111827;
+
+  --red-100: #fee2e2;
+  --red-500: #ef4444;
+
+  --green-100: #ccfbf1;
+  --green-500: #14b8a6;
 }
 
 body {
@@ -67,6 +73,9 @@ body {
 
 .item .text {
   margin-left: 0.5rem;
+  margin-right: 0.5rem;
+
+  flex: 1;
 }
 
 .item svg {
@@ -101,4 +110,32 @@ body {
   border-radius: 8px;
   overflow: hidden;
   margin-bottom: 1rem;
+}
+
+.item-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: 2px;
+  padding: 0.25rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.delete-icon {
+  background: var(--red-100);
+}
+.delete-icon svg {
+  stroke: var(--red-500) !important;
+  cursor: pointer;
+}
+
+.edit-icon {
+  background: var(--green-100);
+}
+.edit-icon svg {
+  stroke: var(--green-500) !important;
+  cursor: pointer;
 }
