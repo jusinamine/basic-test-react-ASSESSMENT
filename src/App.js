@@ -1,19 +1,37 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import "./App.css";
 import { IconBox, PlusIcon, SearchIcon } from "./components/icon";
 import { DotsIcon, EditIcon, TrashIcon } from "./components/icon/icons";
 import { Input, Search } from "./components/input";
 import { Modal } from "./components/modal";
+import {
+  addTodoTask,
+  changeDoneTasks,
+  changeTodoTasks,
+  removeDoneTaskByIndex,
+  removeTodoTaskByIndex,
+  updateTodoTaskByIndex,
+} from "./redux/slices/task.slice";
 function App() {
+  const todoItems = useSelector((state) => state.taskReducer.todo);
+  const doneItems = useSelector((state) => state.taskReducer.done);
+
+  const dispatch = useDispatch();
   const [newTaskInputValue, setNewTaskInputValue] = useState("");
   const [showAddTaskModal, setShowAddTaskModal] = useState(false);
-  const [todoItems, setTodoItems] = useState([]);
-  const [doneItems, setDoneItems] = useState([]);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [searchResults, setSearchResults] = useState([]);
+  const [showSearch, setShowSearch] = useState(false);
+
+  //helps to close the search modal when click outside
+  const openSearchRef = useRef(null);
 
   //function to add new tasks to the todo list
   const handleAddNewTask = () => {
-    setTodoItems((oldValue) => [...oldValue, newTaskInputValue]);
+    dispatch(addTodoTask(newTaskInputValue));
     setNewTaskInputValue("");
     setShowAddTaskModal(false);
   };
@@ -24,11 +42,30 @@ function App() {
 
     //chack if the task in todo or done list and remove it
     if (location === "todo") {
-      setTodoItems((oldValue) => oldValue?.filter((_, i) => i !== index));
+      dispatch(removeTodoTaskByIndex(index));
       return;
     }
 
-    setDoneItems((oldValue) => oldValue?.filter((_, i) => i !== index));
+    dispatch(removeDoneTaskByIndex(index));
+  };
+
+  //function to show the modal of update tasks
+  const showUpdateTaskModal = (e, taskValue, index) => {
+    e.preventDefault();
+    setSelectedTask({ value: taskValue, index });
+    setNewTaskInputValue(taskValue);
+  };
+
+  //function to update any task in todo List
+  const handleUpdateTask = () => {
+    dispatch(
+      updateTodoTaskByIndex({
+        value: newTaskInputValue,
+        index: selectedTask.index,
+      })
+    );
+    setSelectedTask(null);
+    setNewTaskInputValue("");
   };
 
   //function for handling drag and drop from todo list to done list and the opposit
@@ -44,9 +81,9 @@ function App() {
       reorderedItems.splice(result.destination.index, 0, movedItem);
 
       if (sourceList === "todo") {
-        setTodoItems([...reorderedItems]);
+        dispatch(changeTodoTasks([...reorderedItems]));
       } else {
-        setDoneItems([...reorderedItems]);
+        dispatch(changeDoneTasks([...reorderedItems]));
       }
     } else {
       // Moving between lists
@@ -66,15 +103,27 @@ function App() {
         newTodoItems.splice(result.destination.index, 0, movedItem);
       }
 
-      setTodoItems(newTodoItems);
-      setDoneItems(newDoneItems);
+      dispatch(changeTodoTasks(newTodoItems));
+      dispatch(changeDoneTasks(newDoneItems));
     }
+  };
+
+  //handle search tasks
+  const handleSearch = (value) => {
+    const result = todoItems.filter((task) => task.includes(value)).slice(0, 5);
+    setSearchResults(result);
   };
 
   return (
     <div className="App">
       <div className="toolbar">
-        <IconBox icon={<SearchIcon />} />
+        <span ref={openSearchRef}>
+          <IconBox
+            ref={openSearchRef}
+            onClick={() => setShowSearch(true)}
+            icon={<SearchIcon />}
+          />
+        </span>
         <IconBox
           onClick={() => setShowAddTaskModal(true)}
           icon={<PlusIcon />}
@@ -90,6 +139,7 @@ function App() {
               <TodoList
                 todoItems={todoItems}
                 handleRemoveTask={handleRemoveTask}
+                handleUpdateTask={showUpdateTaskModal}
               />
             </div>
           </div>
@@ -106,25 +156,45 @@ function App() {
       </div>
 
       <Modal
-        onAction={handleAddNewTask}
-        onClose={() => setShowAddTaskModal(false)}
-        show={showAddTaskModal}
+        onAction={selectedTask ? handleUpdateTask : handleAddNewTask}
+        onClose={() => {
+          if (showAddTaskModal) setShowAddTaskModal(false);
+          if (selectedTask) setSelectedTask(null);
+        }}
+        show={showAddTaskModal || selectedTask}
+        actionButtonText={selectedTask ? "Update" : "Add"}
       >
         <Input
           value={newTaskInputValue}
           onChange={(value) => setNewTaskInputValue(value)}
-          label={"ADD NEW TASK"}
+          label={showAddTaskModal ? "ADD NEW TASK" : selectedTask?.value}
           placeholder="Write your task here .."
         />
       </Modal>
 
-      <Search show={false} />
+      <Search
+        handleSearch={handleSearch}
+        results={searchResults}
+        show={showSearch}
+        onClose={() => {
+          setShowSearch(false);
+        }}
+        openSearchRef={openSearchRef}
+        onSelect={(ev, item) => {
+          const index = todoItems.indexOf(item);
+          showUpdateTaskModal(ev, item, index);
+        }}
+      />
     </div>
   );
 }
 
 //todo list dropzone
-function TodoList({ todoItems, handleRemoveTask = () => {} }) {
+function TodoList({
+  todoItems,
+  handleRemoveTask = () => {},
+  handleUpdateTask = () => {},
+}) {
   return (
     <Droppable droppableId="todo">
       {(provided) => (
@@ -150,7 +220,10 @@ function TodoList({ todoItems, handleRemoveTask = () => {} }) {
                   <div className="item">
                     <DotsIcon />
                     <div className="text">{item}</div>
-                    <div className="item-icon edit-icon">
+                    <div
+                      className="item-icon edit-icon"
+                      onClick={(e) => handleUpdateTask(e, item, index)}
+                    >
                       <EditIcon height={18} width={18} />
                     </div>
                     <div
@@ -197,9 +270,7 @@ function DoneList({ doneItems, handleRemoveTask = () => {} }) {
                   <div className="item">
                     <DotsIcon />
                     <div className="text">{item}</div>
-                    <div className="item-icon edit-icon">
-                      <EditIcon height={18} width={18} />
-                    </div>
+
                     <div
                       className="item-icon delete-icon"
                       onClick={(e) => handleRemoveTask(e, "done", index)}
