@@ -1,38 +1,104 @@
+:root {
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-600: #475569;
+  --gray-900: #111827;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 .App {
-  text-align: center;
+  height: 100vh;
+  padding: 2rem;
+  background-color: var(--gray-50);
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+* {
+  box-sizing: border-box;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.toolbar > button {
+  margin-right: 1rem;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.main {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+  height: fit-content;
+}
+
+.main > div {
+  flex: 1;
+  padding: 2rem 1rem;
+  max-width: 500px;
+  background-color: white;
+  margin: 0 1rem;
+  border: 1px solid var(--gray-100);
+  border-radius: 8px;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.item-box {
   display: flex;
   flex-direction: column;
+  margin-top: 1rem;
+}
+
+.item {
+  background-color: var(--gray-50);
+  padding: 0.75rem 0.5rem;
+  font-size: 14px;
+  display: flex;
   align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.item .text {
+  margin-left: 0.5rem;
+}
+
+.item svg {
+  stroke: var(--gray-600);
+  cursor: grab;
+}
+
+.item svg:hover {
+  opacity: 0.5;
+}
+
+.absolute-blur-box {
+  opacity: 0.8;
+  height: 100vh;
+  width: 100vw;
+  position: fixed;
+  top: 0;
+  left: 0;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  align-items: center;
+  flex-direction: column;
 }
 
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.absolute-blur-box > div {
+  background-color: #fff;
+  width: 70%;
+  max-width: 700px;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 1rem;
 }
