@@ -1,0 +1,13 @@
+.modal {
+  padding: 1rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.modal-actions button {
+  margin-top: 1rem;
+  margin-left: 1rem;
+}
